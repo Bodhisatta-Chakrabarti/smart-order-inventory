@@ -25,4 +25,7 @@ public class Product {
 
     private Integer quantity;
 
+    @Version
+    private Long version;
+
 }
