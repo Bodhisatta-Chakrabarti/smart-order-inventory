@@ -7,10 +7,11 @@ import com.bodhisatta.smartorderinventory.exception.ResourceNotFoundException;
 import com.bodhisatta.smartorderinventory.repository.ProductRepository;
 import com.bodhisatta.smartorderinventory.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +39,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAllProducts() {
+    public Page<ProductResponse> getAllProducts(int page, int size, String sortBy)
+    {
+        Pageable pageable= PageRequest.of(page, size, Sort.by(sortBy));
 
-        return productRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
-
+        return productRepository.findAll(pageable).map(this::mapToResponse);
     }
+
+//    public List<ProductResponse> getAllProducts() {
+//
+//        return productRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
+//
+//    }
 
     @Override
     public ProductResponse updateProduct(Long id, ProductRequest request) {
@@ -66,6 +74,23 @@ public class ProductServiceImpl implements ProductService {
         Product product=productRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Product not found: " + id));
 
         productRepository.delete(product);
+
+    }
+
+    @Override
+    public Page<ProductResponse> searchProducts(String name, int page, int size)
+    {
+        Pageable pageable=PageRequest.of(page, size);
+
+        return productRepository.findByNameContainingIgnoreCase(name, pageable).map(this::mapToResponse);
+    }
+
+    @Override
+    public Page<ProductResponse> getProductsAbovePrice(Double price, int page, int size) {
+
+        Pageable pageable=PageRequest.of(page, size);
+
+        return productRepository.findProductsAbovePrice(price, pageable).map(this::mapToResponse);
 
     }
 

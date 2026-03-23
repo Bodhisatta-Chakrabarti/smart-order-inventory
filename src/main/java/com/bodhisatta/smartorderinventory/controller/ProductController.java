@@ -5,9 +5,8 @@ import com.bodhisatta.smartorderinventory.dto.response.ProductResponse;
 import com.bodhisatta.smartorderinventory.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -29,10 +28,16 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> getAllProducts()
+    public Page<ProductResponse> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size,
+                                                @RequestParam(defaultValue = "id") String sortBy)
     {
-        return productService.getAllProducts();
+        return productService.getAllProducts(page, size, sortBy);
     }
+
+//    public List<ProductResponse> getAllProducts()
+//    {
+//        return productService.getAllProducts();
+//    }
 
     @PutMapping("/{id}")
     public ProductResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request)
@@ -45,4 +50,19 @@ public class ProductController {
     {
         productService.deleteProduct(id);
     }
+
+    @GetMapping("/search")
+    public Page<ProductResponse> searchProducts(@RequestParam String name, @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "5") int size)
+    {
+        return productService.searchProducts(name, page, size);
+    }
+
+    @GetMapping("/price")
+    public Page<ProductResponse> getProductsAbovePrice(@RequestParam Double price, @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "5") int size)
+    {
+        return productService.getProductsAbovePrice(price, page, size);
+    }
+
 }
